@@ -43,30 +43,13 @@ export const isUrl = (url) => {
  *
  * @returns {HTMLDivElement}
  */
-export const createImageCredits = ({ appName, author, profileLink }) => {
+export const createImageCredits = ({ title }) => {
   const wrapper = make('div', 'inline-image__image-credits');
-  const by = make('div', null, {
-    innerHTML: 'by ',
+  const titleElement = make('div', null, {
+    innerHTML: `${title}`,
     style: 'display: inline;',
-  });
-  const authorProfileLink = make('a', '', {
-    href: `${profileLink}?utm_source=${appName}&utm_medium=referral`,
-    innerHTML: author,
-    target: '_blank',
-  });
-  const on = make('div', null, {
-    innerHTML: ' on ',
-    style: 'display: inline;',
-  });
-  const unsplashLink = make('a', '', {
-    href: `https://unsplash.com/?utm_source=${appName}&utm_medium=referral`,
-    innerHTML: 'Unsplash',
-    target: '_blank',
   });
 
-  wrapper.appendChild(by);
-  wrapper.appendChild(authorProfileLink);
-  wrapper.appendChild(on);
-  wrapper.appendChild(unsplashLink);
+  wrapper.appendChild(titleElement);
   return wrapper;
 };

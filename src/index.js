@@ -190,7 +190,7 @@ export default class InlineImage {
     this._data = { ...this.data, ...data };
 
     if (this.ui.nodes.image) {
-      this.ui.nodes.image.src = this.data.url;
+       this.ui.nodes.image.src = this.data.url;
     }
 
     if (this.ui.nodes.caption) {

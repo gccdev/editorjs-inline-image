@@ -90,6 +90,7 @@ export default class Ui {
       onload: () => this.onImageLoad(),
       onerror: () => this.onImageLoadError(),
     });
+
     const caption = make('div', [this.CSS.input, this.CSS.caption], {
       contentEditable: 'true',
       innerHTML: data.caption || '',
@@ -101,7 +102,6 @@ export default class Ui {
     if (data.url) {
       wrapper.appendChild(loader);
       image.src = data.url;
-      this.buildImageCredits(data);
     } else {
       const controlPanelWrapper = this.controlPanel.render();
       this.nodes.controlPanelWrapper = controlPanelWrapper;
@@ -116,22 +116,6 @@ export default class Ui {
     this.applySettings(data);
 
     return wrapper;
-  }
-
-  /**
-   * Builds Unsplash image credits element
-   *
-   * @param {Object} imageData Tool data
-   * @returns {HTMLDivElement}
-   */
-  buildImageCredits(imageData) {
-    const unsplashData = imageData.unsplash;
-    if (unsplashData && unsplashData.author && unsplashData.profileLink) {
-      const { appName } = this.config.unsplash;
-      const credits = createImageCredits({ ...unsplashData, appName });
-      this.nodes.imageHolder.appendChild(credits);
-      this.nodes.credits = credits;
-    }
   }
 
   /**
@@ -205,7 +189,6 @@ export default class Ui {
   selectImage(data) {
     this.onAddImageData(data);
     this.showLoader();
-    this.buildImageCredits(data);
   }
 
   /**

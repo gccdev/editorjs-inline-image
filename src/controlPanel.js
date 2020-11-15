@@ -1,5 +1,5 @@
 import { make, isUrl, createImageCredits } from './helpers';
-import UnsplashClient from './unsplashClient';
+import ImageClient from './imageClient';
 
 /**
  * Renders control panel view
@@ -42,13 +42,15 @@ export default class ControlPanel {
       loader: null,
       embedUrlTab: null,
       unsplashTab: null,
+      mediaTab: null,
       embedUrlPanel: null,
       unsplashPanel: null,
+      mediaPanel: null,
       imageGallery: null,
       searchInput: null,
     };
 
-    this.unsplashClient = new UnsplashClient(this.config.unsplash);
+    this.unsplashClient = new ImageClient(this.config.unsplash);
     this.searchTimeout = null;
   }
 
@@ -60,23 +62,23 @@ export default class ControlPanel {
   render() {
     const wrapper = make('div', this.cssClasses.controlPanel);
     const tabWrapper = make('div', this.cssClasses.tabWrapper);
-    const embedUrlTab = make('div', [this.cssClasses.tab, this.cssClasses.active], {
+    const embedUrlTab = make('div', this.cssClasses.tab, {
       innerHTML: 'Embed URL',
       onclick: () => this.showEmbedUrlPanel(),
     });
-    const unsplashTab = make('div', this.cssClasses.tab, {
-      innerHTML: 'Unsplash',
+    const unsplashTab = make('div', [this.cssClasses.tab, this.cssClasses.active], {
+      innerHTML: 'Website Media',
       onclick: () => this.showUnsplashPanel(),
     });
 
     const embedUrlPanel = this.renderEmbedUrlPanel();
     const unsplashPanel = this.renderUnsplashPanel();
 
-    tabWrapper.appendChild(embedUrlTab);
     tabWrapper.appendChild(unsplashTab);
+    tabWrapper.appendChild(embedUrlTab);
     wrapper.appendChild(tabWrapper);
-    wrapper.appendChild(embedUrlPanel);
     wrapper.appendChild(unsplashPanel);
+    wrapper.appendChild(embedUrlPanel);
 
     this.nodes.embedUrlPanel = embedUrlPanel;
     this.nodes.unsplashPanel = unsplashPanel;
@@ -116,7 +118,7 @@ export default class ControlPanel {
    * @returns {HTMLDivElement}
    */
   renderEmbedUrlPanel() {
-    const wrapper = make('div');
+    const wrapper = make('div', this.cssClasses.hidden);
     const urlInput = make('div', [this.cssClasses.input, this.cssClasses.caption], {
       id: 'image-url',
       contentEditable: 'true',
@@ -158,7 +160,7 @@ export default class ControlPanel {
    * @returns {HTMLDivElement}
    */
   renderUnsplashPanel() {
-    const wrapper = make('div', this.cssClasses.hidden);
+    const wrapper = make('div', this.cssClasses.active);
     const imageGallery = make('div', this.cssClasses.imageGallery);
     const searchInput = make('div', [this.cssClasses.input, this.cssClasses.caption, this.cssClasses.search], {
       id: 'unsplash-search',
@@ -247,8 +249,7 @@ export default class ControlPanel {
       onclick: () => this.downloadUnsplashImage(image),
     });
 
-    const { appName } = this.config.unsplash;
-    const imageCredits = createImageCredits({ ...image, appName });
+    const imageCredits = createImageCredits({ ...image });
 
     imgWrapper.appendChild(img);
     imgWrapper.appendChild(imageCredits);
@@ -268,14 +269,10 @@ export default class ControlPanel {
    * @returns {void}
    */
   downloadUnsplashImage({
-    url, author, profileLink, downloadLocation,
+    url, downloadLocation,
   }) {
     this.onSelectImage({
       url,
-      unsplash: {
-        author,
-        profileLink,
-      },
     });
     this.unsplashClient.downloadImage(downloadLocation);
   }
