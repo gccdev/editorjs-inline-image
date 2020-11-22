@@ -67,7 +67,7 @@ export default class ControlPanel {
       onclick: () => this.showEmbedUrlPanel(),
     });
     const unsplashTab = make('div', [this.cssClasses.tab, this.cssClasses.active], {
-      innerHTML: 'Website Media',
+      innerHTML: 'Website Images',
       onclick: () => this.showUnsplashPanel(),
     });
 
@@ -75,14 +75,14 @@ export default class ControlPanel {
     const unsplashPanel = this.renderUnsplashPanel();
 
     tabWrapper.appendChild(unsplashTab);
-    tabWrapper.appendChild(embedUrlTab);
+//    tabWrapper.appendChild(embedUrlTab);
     wrapper.appendChild(tabWrapper);
     wrapper.appendChild(unsplashPanel);
-    wrapper.appendChild(embedUrlPanel);
+  //  wrapper.appendChild(embedUrlPanel);
 
-    this.nodes.embedUrlPanel = embedUrlPanel;
+    //this.nodes.embedUrlPanel = embedUrlPanel;
     this.nodes.unsplashPanel = unsplashPanel;
-    this.nodes.embedUrlTab = embedUrlTab;
+    //this.nodes.embedUrlTab = embedUrlTab;
     this.nodes.unsplashTab = unsplashTab;
 
     return wrapper;
@@ -94,9 +94,9 @@ export default class ControlPanel {
    * @returns {void}
    */
   showEmbedUrlPanel() {
-    this.nodes.embedUrlTab.classList.add(this.cssClasses.active);
+//    this.nodes.embedUrlTab.classList.add(this.cssClasses.active);
     this.nodes.unsplashTab.classList.remove(this.cssClasses.active);
-    this.nodes.embedUrlPanel.classList.remove(this.cssClasses.hidden);
+//    this.nodes.embedUrlPanel.classList.remove(this.cssClasses.hidden);
     this.nodes.unsplashPanel.classList.add(this.cssClasses.hidden);
   }
 
@@ -107,9 +107,9 @@ export default class ControlPanel {
    */
   showUnsplashPanel() {
     this.nodes.unsplashTab.classList.add(this.cssClasses.active);
-    this.nodes.embedUrlTab.classList.remove(this.cssClasses.active);
+//    this.nodes.embedUrlTab.classList.remove(this.cssClasses.active);
     this.nodes.unsplashPanel.classList.remove(this.cssClasses.hidden);
-    this.nodes.embedUrlPanel.classList.add(this.cssClasses.hidden);
+//    this.nodes.embedUrlPanel.classList.add(this.cssClasses.hidden);
   }
 
   /**
@@ -155,6 +155,16 @@ export default class ControlPanel {
   }
 
   /**
+   * OnInput handler for Search input
+   *
+   * @returns {void}
+   */
+  searchInputHandler() {
+    this.showLoader();
+    this.performSearch();
+  }
+
+  /**
    * Creates "Unsplash" control panel
    *
    * @returns {HTMLDivElement}
@@ -170,6 +180,15 @@ export default class ControlPanel {
 
     searchInput.dataset.placeholder = 'Search for an image...';
 
+    var observer = new MutationObserver(function(mutations) {
+       if (document.contains(searchInput)) {
+            searchInput.oninput();
+            observer.disconnect();
+        }
+    });
+
+    observer.observe(document, {attributes: false, childList: true, characterData: false, subtree:true});
+
     wrapper.appendChild(searchInput);
     wrapper.appendChild(imageGallery);
 
@@ -177,16 +196,6 @@ export default class ControlPanel {
     this.nodes.imageGallery = imageGallery;
 
     return wrapper;
-  }
-
-  /**
-   * OnInput handler for Search input
-   *
-   * @returns {void}
-   */
-  searchInputHandler() {
-    this.showLoader();
-    this.performSearch();
   }
 
   /**
