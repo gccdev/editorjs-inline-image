@@ -75,14 +75,10 @@ export default class ControlPanel {
     const unsplashPanel = this.renderUnsplashPanel();
 
     tabWrapper.appendChild(unsplashTab);
-//    tabWrapper.appendChild(embedUrlTab);
     wrapper.appendChild(tabWrapper);
     wrapper.appendChild(unsplashPanel);
-  //  wrapper.appendChild(embedUrlPanel);
 
-    //this.nodes.embedUrlPanel = embedUrlPanel;
     this.nodes.unsplashPanel = unsplashPanel;
-    //this.nodes.embedUrlTab = embedUrlTab;
     this.nodes.unsplashTab = unsplashTab;
 
     return wrapper;
@@ -94,9 +90,7 @@ export default class ControlPanel {
    * @returns {void}
    */
   showEmbedUrlPanel() {
-//    this.nodes.embedUrlTab.classList.add(this.cssClasses.active);
     this.nodes.unsplashTab.classList.remove(this.cssClasses.active);
-//    this.nodes.embedUrlPanel.classList.remove(this.cssClasses.hidden);
     this.nodes.unsplashPanel.classList.add(this.cssClasses.hidden);
   }
 
@@ -107,9 +101,7 @@ export default class ControlPanel {
    */
   showUnsplashPanel() {
     this.nodes.unsplashTab.classList.add(this.cssClasses.active);
-//    this.nodes.embedUrlTab.classList.remove(this.cssClasses.active);
     this.nodes.unsplashPanel.classList.remove(this.cssClasses.hidden);
-//    this.nodes.embedUrlPanel.classList.add(this.cssClasses.hidden);
   }
 
   /**
@@ -218,7 +210,10 @@ export default class ControlPanel {
   performSearch() {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
-      const query = this.nodes.searchInput.innerHTML;
+      var query = this.nodes.searchInput.innerHTML;
+      if (query === '<br>') {
+        query = '';
+      }
       this.unsplashClient.searchImages(query,
         (results) => this.appendImagesToGallery(results));
     }, 1000);
