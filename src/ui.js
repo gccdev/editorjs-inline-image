@@ -4,6 +4,8 @@ import ControlPanel from './controlPanel';
 import bgIcon from '../assets/backgroundIcon.svg';
 import borderIcon from '../assets/borderIcon.svg';
 import stretchedIcon from '../assets/toolboxIcon.svg';
+import floatLeft from '../assets/floatLeft.svg';
+import floatRight from '../assets/floatRight.svg';
 
 /**
  * Class for working with UI:
@@ -48,6 +50,14 @@ export default class Ui {
       {
         name: 'withBackground',
         icon: bgIcon,
+      },
+      {
+        name: 'floatLeft',
+        icon: floatLeft,
+      },
+      {
+        name: 'floatRight',
+        icon: floatRight,
       },
     ];
 

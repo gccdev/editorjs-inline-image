@@ -58,6 +58,8 @@ export default class InlineImage {
       withBorder: data.withBorder !== undefined ? data.withBorder : false,
       withBackground: data.withBackground !== undefined ? data.withBackground : false,
       stretched: data.stretched !== undefined ? data.stretched : false,
+      floatLeft: data.floatLeft !== undefined ? data.floatLeft : false,
+      floatRight: data.floatRight !== undefined ? data.floatRight : false,
       unsplash: data.unsplash,
     };
   }
@@ -107,6 +109,8 @@ export default class InlineImage {
       withBorder: {},
       withBackground: {},
       stretched: {},
+      floatLeft: {},
+      floatRight: {},
       caption: {
         br: true,
       },

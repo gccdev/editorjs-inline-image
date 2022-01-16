@@ -43,6 +43,15 @@
   margin: 0 auto;
 }
 
+.inline-image__picture--floatLeft img {
+  float: left;
+  margin-right: 5px;
+}
+
+.inline-image__picture--floatRight img {
+  float: right;
+  margin-left: 5px;
+}
 
 .inline-image__picture--withBorder {
   border: 1px solid #e8e8eb;
