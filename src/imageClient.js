@@ -5,7 +5,7 @@ import axios from 'axios';
  */
 export default class ImageClient {
   constructor(config) {
-    this.apiUrl = config && config.apiUrl ? config.apiUrl : '/media/searchdata';
+    this.apiUrl = config && config.apiUrl ? config.apiUrl : '/api/media/searchdata';
     this.perPage = config && config.maxResults ? config.maxResults : 30;
   }
 
