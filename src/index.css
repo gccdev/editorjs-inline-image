@@ -160,3 +160,22 @@
 .scroll {
   overflow-y: scroll;
 }
+
+.inline-image__upload-panel {
+  padding: 10px;
+}
+
+.inline-image__upload-zone {
+  border: 2px dashed #c4c4c4;
+  border-radius: 4px;
+  padding: 40px 10px;
+  text-align: center;
+  color: #707684;
+  cursor: pointer;
+}
+
+.inline-image__upload-zone:hover,
+.inline-image__upload-zone--active {
+  border-color: #388ae5;
+  background: #eff2f5;
+}
