@@ -9,6 +9,8 @@ module.exports = {
     fetch: false,
     document: false,
     FileReader: false,
+    FormData: false,
+    File: false,
   },
   env: {
     'jest/globals': true,

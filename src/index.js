@@ -1,4 +1,5 @@
 import './index.css';
+import axios from 'axios';
 import Ui from './ui';
 import toolboxIcon from '../assets/toolboxIcon.svg';
 
@@ -43,6 +44,7 @@ export default class InlineImage {
    */
   constructor({ data, api, config }) {
     this.api = api;
+    this.uploadEndpoint = (config && config.uploadEndpoint) || '/api/admin/media/add';
 
     this.ui = new Ui({
       data,
@@ -76,14 +78,52 @@ export default class InlineImage {
   /**
    * Returns Block data
    *
-   * @returns {InlineImageData}
+   * @returns {Promise<InlineImageData>}
    */
-  save() {
+  async save() {
     const { caption } = this.ui.nodes;
 
     this.data.caption = caption.innerHTML;
 
-    return this.data;
+    if (this.data.file) {
+      await this.uploadFile(this.data.file);
+    }
+
+    const { file, ...output } = this.data;
+    return output;
+  }
+
+  /**
+   * Uploads a pending file to the media endpoint and swaps the
+   * preview data-URL for the returned server URL. On failure it keeps
+   * the data-URL so the post still saves.
+   *
+   * @param {File} file Pending image file
+   * @returns {Promise<void>}
+   */
+  uploadFile(file) {
+    const formData = new FormData();
+    formData.append('filename', file);
+    formData.append('title', this.data.caption || file.name);
+
+    return axios.post(this.uploadEndpoint, formData, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+      .then((response) => {
+        const uploadedUrl = response && response.data
+          && response.data.data && response.data.data.url;
+        if (!uploadedUrl) {
+          throw new Error('Malformed upload response');
+        }
+        this.data.url = uploadedUrl;
+        delete this.data.file;
+      })
+      .catch(() => {
+        this.api.notifier.show({
+          message: 'Image upload failed, using a temporary preview.',
+          style: 'error',
+        });
+      });
   }
 
   /**
@@ -194,7 +234,7 @@ export default class InlineImage {
     this._data = { ...this.data, ...data };
 
     if (this.ui.nodes.image) {
-       this.ui.nodes.image.src = this.data.url;
+      this.ui.nodes.image.src = this.data.url;
     }
 
     if (this.ui.nodes.caption) {
