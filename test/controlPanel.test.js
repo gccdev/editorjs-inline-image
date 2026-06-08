@@ -135,4 +135,44 @@ describe('ControlPanel', () => {
       });
     });
   });
+
+  describe('upload', () => {
+    let uploadPanel;
+
+    beforeEach(() => {
+      uploadPanel = controlPanel.nodes.uploadPanel;
+    });
+
+    it('renders the upload panel with a drop zone and a hidden file input', () => {
+      expect(uploadPanel).not.toBeEmptyDOMElement();
+      expect(controlPanel.nodes.dropZone).not.toBeNull();
+      expect(controlPanel.nodes.fileInput.type).toBe('file');
+    });
+
+    it('opens the file dialog when the drop zone is clicked', () => {
+      const clickSpy = jest.spyOn(controlPanel.nodes.fileInput, 'click').mockImplementation();
+      controlPanel.nodes.dropZone.click();
+      expect(clickSpy).toHaveBeenCalled();
+    });
+
+    it('previews a chosen image as a base64 data-url via onSelectImage', async () => {
+      const file = new File(['imgbytes'], 'pic.png', { type: 'image/png' });
+      await controlPanel.handleFile(file);
+
+      expect(onSelectImage).toHaveBeenCalledWith(expect.objectContaining({
+        caption: 'pic.png',
+        file,
+        url: expect.stringContaining('data:'),
+      }));
+      expect(notify).not.toHaveBeenCalled();
+    });
+
+    it('rejects a non-image file with an error and does not select it', async () => {
+      const file = new File(['text'], 'notes.txt', { type: 'text/plain' });
+      await controlPanel.handleFile(file);
+
+      expect(onSelectImage).not.toHaveBeenCalled();
+      expect(notify).toHaveBeenCalled();
+    });
+  });
 });

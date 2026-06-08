@@ -34,6 +34,9 @@ export default class ControlPanel {
       active: 'active',
       hidden: 'hidden',
       scroll: 'scroll',
+      uploadPanel: 'inline-image__upload-panel',
+      dropZone: 'inline-image__upload-zone',
+      dropZoneActive: 'inline-image__upload-zone--active',
     };
 
     this.onSelectImage = onSelectImage;
@@ -48,6 +51,10 @@ export default class ControlPanel {
       mediaPanel: null,
       imageGallery: null,
       searchInput: null,
+      uploadTab: null,
+      uploadPanel: null,
+      dropZone: null,
+      fileInput: null,
     };
 
     this.unsplashClient = new ImageClient(this.config.unsplash);
@@ -70,16 +77,25 @@ export default class ControlPanel {
       innerHTML: 'Website Images',
       onclick: () => this.showUnsplashPanel(),
     });
+    const uploadTab = make('div', this.cssClasses.tab, {
+      innerHTML: 'Upload',
+      onclick: () => this.showUploadPanel(),
+    });
 
     const embedUrlPanel = this.renderEmbedUrlPanel();
     const unsplashPanel = this.renderUnsplashPanel();
+    const uploadPanel = this.renderUploadPanel();
 
     tabWrapper.appendChild(unsplashTab);
+    tabWrapper.appendChild(uploadTab);
     wrapper.appendChild(tabWrapper);
     wrapper.appendChild(unsplashPanel);
+    wrapper.appendChild(uploadPanel);
 
     this.nodes.unsplashPanel = unsplashPanel;
     this.nodes.unsplashTab = unsplashTab;
+    this.nodes.uploadPanel = uploadPanel;
+    this.nodes.uploadTab = uploadTab;
 
     return wrapper;
   }
@@ -102,6 +118,87 @@ export default class ControlPanel {
   showUnsplashPanel() {
     this.nodes.unsplashTab.classList.add(this.cssClasses.active);
     this.nodes.unsplashPanel.classList.remove(this.cssClasses.hidden);
+    this.nodes.uploadTab.classList.remove(this.cssClasses.active);
+    this.nodes.uploadPanel.classList.add(this.cssClasses.hidden);
+  }
+
+  showUploadPanel() {
+    this.nodes.uploadTab.classList.add(this.cssClasses.active);
+    this.nodes.uploadPanel.classList.remove(this.cssClasses.hidden);
+    this.nodes.unsplashTab.classList.remove(this.cssClasses.active);
+    this.nodes.unsplashPanel.classList.add(this.cssClasses.hidden);
+  }
+
+  renderUploadPanel() {
+    const wrapper = make('div', [this.cssClasses.uploadPanel, this.cssClasses.hidden]);
+    const dropZone = make('div', this.cssClasses.dropZone, {
+      innerHTML: 'Drag an image here, or click to choose a file',
+    });
+    const fileInput = make('input', null, {
+      type: 'file',
+      accept: 'image/*',
+      style: 'display: none;',
+      onchange: (event) => {
+        const [file] = event.target.files;
+        if (file) {
+          this.handleFile(file);
+        }
+      },
+    });
+
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (event) => {
+      event.preventDefault();
+      dropZone.classList.add(this.cssClasses.dropZoneActive);
+    };
+    dropZone.ondragleave = () => dropZone.classList.remove(this.cssClasses.dropZoneActive);
+    dropZone.ondrop = (event) => {
+      event.preventDefault();
+      dropZone.classList.remove(this.cssClasses.dropZoneActive);
+      const [file] = event.dataTransfer.files;
+      if (file) {
+        this.handleFile(file);
+      }
+    };
+
+    wrapper.appendChild(dropZone);
+    wrapper.appendChild(fileInput);
+
+    this.nodes.dropZone = dropZone;
+    this.nodes.fileInput = fileInput;
+
+    return wrapper;
+  }
+
+  handleFile(file) {
+    if (!file.type || !file.type.startsWith('image/')) {
+      this.api.notifier.show({
+        message: 'Please choose an image file.',
+        style: 'error',
+      });
+      return Promise.resolve();
+    }
+
+    // Promise returned for test sequencing; production callers (onchange/ondrop) fire-and-forget.
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        this.onSelectImage({
+          url: event.target.result,
+          caption: file.name,
+          file,
+        });
+        resolve();
+      };
+      reader.onerror = () => {
+        this.api.notifier.show({
+          message: 'Could not read the file.',
+          style: 'error',
+        });
+        resolve();
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   /**
