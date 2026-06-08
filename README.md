@@ -4,7 +4,7 @@
 
 Image tool for [Editor.js](https://editorjs.io).
 
-Embed images from image files, URLs or [Unsplash](https://unsplash.com/).
+Embed images by uploading a file (drop zone or file dialog), from URLs, or from your media library.
 
 ![](assets/demo.gif)
 
@@ -56,6 +56,7 @@ const editor = EditorJS({
 | Field          | Type      | Description                     |
 | -------------- | --------- | ------------------------------- |
 | unsplash       | `{appName: string, clientId: string, maxResults: string}`  | Config for **Unsplash API**. Contains 3 fields: <br><br> **appName**: Unspalsh `Application Name`. <br><br> **clientId**: Unsplash `Access Key`. <br><br> **maxResults**: Max number of images per search (default 30).                    |
+| uploadEndpoint | `string`  | Endpoint that receives the multipart upload (field `filename`) when a post is saved and returns `{ status, data: { url } }`. Default `/api/admin/media/add`. |
 
 ## Tool's tunes
 
