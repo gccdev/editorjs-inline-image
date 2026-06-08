@@ -1,5 +1,6 @@
 import InlineImage from '../src/index';
 import Ui from '../src/ui';
+import ImageClient from '../src/imageClient';
 import createInlineImage from './fixtures/inlineImage';
 import { data } from './fixtures/toolData';
 
@@ -58,19 +59,28 @@ describe('InlineImage', () => {
       expect(mockSetData).toHaveBeenLastCalledWith({ url: event.detail.data });
     });
 
-    it('handles file event', () => {
-      const event = {
-        type: 'file',
-        detail: {
-          file: 'https://www.example.com/image.png',
-        },
-      };
+    it('handles file event by uploading and embedding the server url', async () => {
+      const file = new File(['x'], 'pic.png', { type: 'image/png' });
+      const event = { type: 'file', detail: { file } };
+      const upload = jest.spyOn(ImageClient.prototype, 'uploadImage')
+        .mockResolvedValue('/media/pic.png');
 
-      const mockOnDropHandler = jest.spyOn(InlineImage.prototype, 'onDropHandler')
-        .mockImplementation(() => Promise.resolve());
       inlineImage.onPaste(event);
+      await new Promise((resolve) => setImmediate(resolve));
 
-      expect(mockOnDropHandler).toHaveBeenLastCalledWith(event.detail.file);
+      expect(upload).toHaveBeenCalledWith(file, expect.any(String));
+      expect(mockSetData).toHaveBeenLastCalledWith({ url: '/media/pic.png', caption: 'pic.png' });
+    });
+
+    it('removes the block and notifies when a pasted file fails to upload', async () => {
+      const file = new File(['x'], 'pic.png', { type: 'image/png' });
+      const event = { type: 'file', detail: { file } };
+      jest.spyOn(ImageClient.prototype, 'uploadImage').mockRejectedValue(new Error('fail'));
+
+      inlineImage.onPaste(event);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      expect(Ui.prototype.removeCurrentBlock).toHaveBeenCalled();
     });
   });
 

@@ -1,5 +1,6 @@
 import './index.css';
 import Ui from './ui';
+import ImageClient from './imageClient';
 import toolboxIcon from '../assets/toolboxIcon.svg';
 
 /**
@@ -43,6 +44,8 @@ export default class InlineImage {
    */
   constructor({ data, api, config }) {
     this.api = api;
+    this.imageClient = new ImageClient(config && config.unsplash);
+    this.uploadEndpoint = (config && config.uploadEndpoint) || '/api/admin/media/add';
 
     this.ui = new Ui({
       data,
@@ -118,24 +121,28 @@ export default class InlineImage {
   }
 
   /**
-   * Read pasted image and convert it to base64
+   * Upload a pasted or dropped image file to the media endpoint and embed
+   * the returned server URL. The image is never stored as base64. On failure
+   * the (loading) block is removed and the user is notified.
    *
    * @param {File} file Image file
-   * @returns {Promise<InlineImageData>}
+   * @returns {Promise<void>}
    */
-  onDropHandler(file) {
-    const reader = new FileReader();
-
-    reader.readAsDataURL(file);
-
-    return new Promise((resolve) => {
-      reader.onload = (event) => {
-        resolve({
-          url: event.target.result,
+  uploadPastedFile(file) {
+    return this.imageClient.uploadImage(file, this.uploadEndpoint)
+      .then((url) => {
+        this.data = {
+          url,
           caption: file.name,
+        };
+      })
+      .catch(() => {
+        this.api.notifier.show({
+          message: 'Image upload failed, please try again.',
+          style: 'error',
         });
-      };
-    });
+        this.ui.removeCurrentBlock();
+      });
   }
 
   /**
@@ -157,10 +164,7 @@ export default class InlineImage {
         };
         break;
       case 'file':
-        this.onDropHandler(event.detail.file)
-          .then((data) => {
-            this.data = data;
-          });
+        this.uploadPastedFile(event.detail.file);
         break;
       default:
         break;
