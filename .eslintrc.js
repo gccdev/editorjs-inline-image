@@ -11,6 +11,8 @@ module.exports = {
     FileReader: false,
     FormData: false,
     File: false,
+    atob: false,
+    Uint8Array: false,
   },
   env: {
     'jest/globals': true,

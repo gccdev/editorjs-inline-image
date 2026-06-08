@@ -121,6 +121,37 @@ export default class InlineImage {
   }
 
   /**
+   * Convert a base64 `data:` image URL into a File so it can be uploaded
+   * instead of stored inline. Returns null for non-data or non-base64 URLs
+   * (e.g. remote `http(s)` sources), which are embedded as-is.
+   *
+   * @param {string} dataUrl Image source from a pasted tag
+   * @returns {File|null}
+   */
+  dataUrlToFile(dataUrl) {
+    if (!dataUrl || !dataUrl.startsWith('data:')) {
+      return null;
+    }
+    const commaIndex = dataUrl.indexOf(',');
+    const meta = dataUrl.slice(0, commaIndex);
+    if (commaIndex === -1 || !meta.includes('base64')) {
+      return null;
+    }
+    try {
+      const mime = (meta.match(/data:([^;]+)/) || [])[1] || 'image/png';
+      const binary = atob(dataUrl.slice(commaIndex + 1));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      const ext = (mime.split('/')[1] || 'png').split('+')[0];
+      return new File([bytes], `pasted-image.${ext}`, { type: mime });
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /**
    * Upload a pasted or dropped image file to the media endpoint and embed
    * the returned server URL. The image is never stored as base64. On failure
    * the (loading) block is removed and the user is notified.
@@ -153,11 +184,16 @@ export default class InlineImage {
   onPaste(event) {
     this.ui.showLoader();
     switch (event.type) {
-      case 'tag':
-        this.data = {
-          url: event.detail.data.src,
-        };
+      case 'tag': {
+        const { src } = event.detail.data;
+        const file = this.dataUrlToFile(src);
+        if (file) {
+          this.uploadPastedFile(file);
+        } else {
+          this.data = { url: src };
+        }
         break;
+      }
       case 'pattern':
         this.data = {
           url: event.detail.data,

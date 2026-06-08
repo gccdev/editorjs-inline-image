@@ -46,6 +46,31 @@ describe('InlineImage', () => {
       expect(mockSetData).toHaveBeenLastCalledWith({ url: event.detail.data.src });
     });
 
+    it('handles a tag event with a base64 data-uri by uploading it', async () => {
+      const event = {
+        type: 'tag',
+        detail: {
+          data: {
+            src: 'data:image/png;base64,aGVsbG8=',
+          },
+        },
+      };
+      const upload = jest.spyOn(ImageClient.prototype, 'uploadImage')
+        .mockResolvedValue('/media/pasted.png');
+
+      inlineImage.onPaste(event);
+      await new Promise((resolve) => setImmediate(resolve));
+
+      const uploadedFile = upload.mock.calls[0][0];
+      expect(uploadedFile).toBeInstanceOf(File);
+      expect(uploadedFile.type).toBe('image/png');
+      expect(uploadedFile.name).toMatch(/\.png$/);
+      expect(mockSetData).toHaveBeenLastCalledWith({
+        url: '/media/pasted.png',
+        caption: uploadedFile.name,
+      });
+    });
+
     it('handles pattern event', () => {
       const event = {
         type: 'pattern',
