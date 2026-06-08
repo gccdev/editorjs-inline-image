@@ -56,7 +56,7 @@ const editor = EditorJS({
 | Field          | Type      | Description                     |
 | -------------- | --------- | ------------------------------- |
 | unsplash       | `{appName: string, clientId: string, maxResults: string}`  | Config for **Unsplash API**. Contains 3 fields: <br><br> **appName**: Unspalsh `Application Name`. <br><br> **clientId**: Unsplash `Access Key`. <br><br> **maxResults**: Max number of images per search (default 30).                    |
-| uploadEndpoint | `string`  | Endpoint that receives the multipart upload (field `filename`) when a post is saved and returns `{ status, data: { url } }`. Default `/api/admin/media/add`. |
+| uploadEndpoint | `string`  | Endpoint that receives the multipart upload (field `filename`) when an image is selected/dropped and returns `{ status, data: { url } }`. The returned URL is embedded in the block; the image is never stored as base64. Default `/api/admin/media/add`. |
 
 ## Tool's tunes
 

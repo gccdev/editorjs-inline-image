@@ -1,7 +1,18 @@
 # Design: File upload for editorjs-inline-image
 
 Date: 2026-06-08
-Status: Approved
+Status: Approved (superseded on upload timing — see Addendum)
+
+> **Addendum (2026-06-08, post-testing):** The originally-approved **deferred**
+> upload (hold base64 in the block, upload on post-confirm) was found in testing
+> to be incompatible with gccwebsite's editor pages: they serialise the editor
+> into a hidden field on every `onChange` and submit it **urlencoded**, which has
+> a 100 kB body limit. Holding base64 in the block let it leak into that body and
+> produced `413 request entity too large` on save. The implementation was changed
+> to **upload immediately on select/drop** and store **only the returned server
+> URL** in the block — base64 is never persisted. All other aspects of this design
+> (drop zone + file dialog, the `/api/admin/media/add` JSON contract, the
+> `uploadEndpoint` config) are unchanged.
 
 ## Goal
 

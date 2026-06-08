@@ -1,37 +1,19 @@
 import axios from 'axios';
-import InlineImage from '../src/index';
-import createApi from './fixtures/editor';
-import { config } from './fixtures/toolData';
+import ImageClient from '../src/imageClient';
 
 jest.mock('axios');
-
-const notify = jest.fn();
-
-const BASE64 = 'data:image/png;base64,AAAA';
-
-function buildTool(extraData = {}) {
-  const tool = new InlineImage({
-    data: {},
-    api: createApi(notify),
-    config,
-  });
-  // Real Ui has no rendered nodes; give save() a caption node to read.
-  tool.ui.nodes.caption = document.createElement('div');
-  tool.data = { url: BASE64, caption: 'cap', ...extraData };
-  return tool;
-}
 
 afterEach(() => {
   jest.clearAllMocks();
 });
 
-describe('InlineImage deferred upload', () => {
-  it('uploads a pending file on save and swaps in the returned url', async () => {
+describe('ImageClient.uploadImage', () => {
+  it('POSTs the file as multipart and resolves the returned server url', async () => {
     axios.post.mockResolvedValue({ data: { status: 'success', data: { url: '/media/pic.png' } } });
+    const client = new ImageClient();
     const file = new File(['x'], 'pic.png', { type: 'image/png' });
-    const tool = buildTool({ file });
 
-    const output = await tool.save();
+    const url = await client.uploadImage(file, '/api/admin/media/add');
 
     expect(axios.post).toHaveBeenCalledWith(
       '/api/admin/media/add',
@@ -42,29 +24,23 @@ describe('InlineImage deferred upload', () => {
     );
     const sentFormData = axios.post.mock.calls[0][1];
     expect(sentFormData.get('filename')).toBe(file);
-    expect(sentFormData.get('title')).toBe('cap');
-    expect(output.url).toBe('/media/pic.png');
-    expect(output.file).toBeUndefined();
+    expect(sentFormData.get('title')).toBe('pic.png');
+    expect(url).toBe('/media/pic.png');
   });
 
-  it('does not upload when there is no pending file', async () => {
-    const tool = buildTool();
-
-    const output = await tool.save();
-
-    expect(axios.post).not.toHaveBeenCalled();
-    expect(output.url).toBe(BASE64);
-  });
-
-  it('keeps the base64 preview and notifies on upload failure', async () => {
-    axios.post.mockRejectedValue(new Error('network'));
+  it('rejects when the response is malformed (no url)', async () => {
+    axios.post.mockResolvedValue({ data: { status: 'success' } });
+    const client = new ImageClient();
     const file = new File(['x'], 'pic.png', { type: 'image/png' });
-    const tool = buildTool({ file });
 
-    const output = await tool.save();
+    await expect(client.uploadImage(file, '/api/admin/media/add')).rejects.toThrow();
+  });
 
-    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ style: 'error' }));
-    expect(output.url).toBe(BASE64);
-    expect(output.file).toBeUndefined();
+  it('rejects when the request fails', async () => {
+    axios.post.mockRejectedValue(new Error('network'));
+    const client = new ImageClient();
+    const file = new File(['x'], 'pic.png', { type: 'image/png' });
+
+    await expect(client.uploadImage(file, '/api/admin/media/add')).rejects.toThrow();
   });
 });

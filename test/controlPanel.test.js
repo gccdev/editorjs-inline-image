@@ -2,6 +2,7 @@ import createControlPanel from './fixtures/controlPanel';
 import { parsedResponse } from './fixtures/unsplashApi';
 import { triggerEvent } from './testHelpers';
 import UnsplashClient from '../src/unsplashClient';
+import ImageClient from '../src/imageClient';
 
 const onSelectImage = jest.fn();
 const notify = jest.fn();
@@ -155,22 +156,35 @@ describe('ControlPanel', () => {
       expect(clickSpy).toHaveBeenCalled();
     });
 
-    it('previews a chosen image as a base64 data-url via onSelectImage', async () => {
+    it('uploads the chosen image immediately and selects the returned server url', async () => {
+      const upload = jest.spyOn(ImageClient.prototype, 'uploadImage')
+        .mockResolvedValue('/media/pic.png');
       const file = new File(['imgbytes'], 'pic.png', { type: 'image/png' });
+
       await controlPanel.handleFile(file);
 
-      expect(onSelectImage).toHaveBeenCalledWith(expect.objectContaining({
-        caption: 'pic.png',
-        file,
-        url: expect.stringContaining('data:'),
-      }));
+      expect(upload).toHaveBeenCalledWith(file, expect.any(String));
+      expect(onSelectImage).toHaveBeenCalledWith({ url: '/media/pic.png', caption: 'pic.png' });
       expect(notify).not.toHaveBeenCalled();
     });
 
-    it('rejects a non-image file with an error and does not select it', async () => {
-      const file = new File(['text'], 'notes.txt', { type: 'text/plain' });
+    it('notifies and does not select the image when the upload fails', async () => {
+      jest.spyOn(ImageClient.prototype, 'uploadImage').mockRejectedValue(new Error('fail'));
+      const file = new File(['imgbytes'], 'pic.png', { type: 'image/png' });
+
       await controlPanel.handleFile(file);
 
+      expect(onSelectImage).not.toHaveBeenCalled();
+      expect(notify).toHaveBeenCalled();
+    });
+
+    it('rejects a non-image file with an error and does not upload it', async () => {
+      const upload = jest.spyOn(ImageClient.prototype, 'uploadImage');
+      const file = new File(['text'], 'notes.txt', { type: 'text/plain' });
+
+      await controlPanel.handleFile(file);
+
+      expect(upload).not.toHaveBeenCalled();
       expect(onSelectImage).not.toHaveBeenCalled();
       expect(notify).toHaveBeenCalled();
     });

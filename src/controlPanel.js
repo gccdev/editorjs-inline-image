@@ -59,6 +59,8 @@ export default class ControlPanel {
 
     this.unsplashClient = new ImageClient(this.config.unsplash);
     this.searchTimeout = null;
+    this.uploadEndpoint = (config && config.uploadEndpoint) || '/api/admin/media/add';
+    this.dropZonePrompt = 'Drag an image here, or click to choose a file';
   }
 
   /**
@@ -132,7 +134,7 @@ export default class ControlPanel {
   renderUploadPanel() {
     const wrapper = make('div', [this.cssClasses.uploadPanel, this.cssClasses.hidden]);
     const dropZone = make('div', this.cssClasses.dropZone, {
-      innerHTML: 'Drag an image here, or click to choose a file',
+      innerHTML: this.dropZonePrompt,
     });
     const fileInput = make('input', null, {
       type: 'file',
@@ -170,6 +172,17 @@ export default class ControlPanel {
     return wrapper;
   }
 
+  /**
+   * Uploads the chosen image to the media endpoint immediately and embeds
+   * the returned server URL. The image is never held as base64 in the block,
+   * so editor content stays small. On failure the image is not embedded.
+   *
+   * Returns a Promise for test sequencing; production callers
+   * (onchange/ondrop) fire-and-forget.
+   *
+   * @param {File} file Image file selected or dropped by the user
+   * @returns {Promise<void>}
+   */
   handleFile(file) {
     if (!file.type || !file.type.startsWith('image/')) {
       this.api.notifier.show({
@@ -179,26 +192,19 @@ export default class ControlPanel {
       return Promise.resolve();
     }
 
-    // Promise returned for test sequencing; production callers (onchange/ondrop) fire-and-forget.
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        this.onSelectImage({
-          url: event.target.result,
-          caption: file.name,
-          file,
-        });
-        resolve();
-      };
-      reader.onerror = () => {
+    this.nodes.dropZone.innerHTML = 'Uploading…';
+
+    return this.unsplashClient.uploadImage(file, this.uploadEndpoint)
+      .then((url) => {
+        this.onSelectImage({ url, caption: file.name });
+      })
+      .catch(() => {
+        this.nodes.dropZone.innerHTML = this.dropZonePrompt;
         this.api.notifier.show({
-          message: 'Could not read the file.',
+          message: 'Image upload failed, please try again.',
           style: 'error',
         });
-        resolve();
-      };
-      reader.readAsDataURL(file);
-    });
+      });
   }
 
   /**

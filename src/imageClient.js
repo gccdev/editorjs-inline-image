@@ -28,6 +28,32 @@ export default class ImageClient {
   }
 
   /**
+   * Uploads an image file to the media endpoint and resolves the
+   * stored image URL returned by the server.
+   *
+   * @param {File} file Image file to upload
+   * @param {string} uploadUrl Endpoint that accepts the multipart upload
+   * @returns {Promise<string>} URL of the stored image
+   */
+  uploadImage(file, uploadUrl) {
+    const url = uploadUrl || '/api/admin/media/add';
+    const formData = new FormData();
+    formData.append('filename', file);
+    formData.append('title', file.name);
+
+    return axios.post(url, formData, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    }).then((response) => {
+      const imageUrl = response && response.data
+        && response.data.data && response.data.data.url;
+      if (!imageUrl) {
+        throw new Error('Malformed upload response');
+      }
+      return imageUrl;
+    });
+  }
+
+  /**
    * Parses Unsplash API response
    * @param {{results: string}} results Array of images from Unsplash
    */
