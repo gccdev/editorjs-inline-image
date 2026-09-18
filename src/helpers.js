@@ -46,7 +46,7 @@ export const isUrl = (url) => {
 export const createImageCredits = ({ title }) => {
   const wrapper = make('div', 'inline-image__image-credits');
   const titleElement = make('div', null, {
-    innerHTML: `${title}`,
+    textContent: title,
     style: 'display: inline;',
   });
 
