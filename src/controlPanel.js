@@ -215,14 +215,16 @@ export default class ControlPanel {
 
     searchInput.dataset.placeholder = 'Search for an image...';
 
-    var observer = new MutationObserver(function(mutations) {
-       if (document.contains(searchInput)) {
-            searchInput.oninput();
-            observer.disconnect();
-        }
+    const observer = new MutationObserver(() => {
+      if (document.contains(searchInput)) {
+        searchInput.oninput();
+        observer.disconnect();
+      }
     });
 
-    observer.observe(document, {attributes: false, childList: true, characterData: false, subtree:true});
+    observer.observe(document, {
+      attributes: false, childList: true, characterData: false, subtree: true,
+    });
 
     wrapper.appendChild(searchInput);
     wrapper.appendChild(imageGallery);
@@ -253,7 +255,7 @@ export default class ControlPanel {
   performSearch() {
     clearTimeout(this.searchTimeout);
     this.searchTimeout = setTimeout(() => {
-      var query = this.nodes.searchInput.innerHTML;
+      let query = this.nodes.searchInput.innerHTML;
       if (query === '<br>') {
         query = '';
       }
