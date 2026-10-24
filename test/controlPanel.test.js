@@ -24,7 +24,6 @@ describe('ControlPanel', () => {
       const tabs = Array.from(wrapper.querySelectorAll('.inline-image__tab'), (tab) => tab.innerHTML);
 
       expect(tabs).toEqual(['Website Images', 'Upload']);
-      expect(controlPanel.nodes.embedUrlPanel).toBeNull();
       expect(wrapper.querySelector('#image-url')).toBeNull();
     });
   });
@@ -87,11 +86,8 @@ describe('ControlPanel', () => {
     describe('embed image', () => {
       let imageGallery;
       let imageData;
-      let mockDownloadImage;
 
       beforeEach(() => {
-        mockDownloadImage = jest.spyOn(ImageClient.prototype, 'downloadImage')
-          .mockImplementation();
         controlPanel.appendImagesToGallery([parsedResponse[0]]);
         imageGallery = controlPanel.nodes.imageGallery;
         [imageData] = parsedResponse;
@@ -100,10 +96,6 @@ describe('ControlPanel', () => {
 
       it('selects the image by its url alone, without unsplash credits', () => {
         expect(onSelectImage).toHaveBeenCalledWith({ url: imageData.url });
-      });
-
-      it('requests the image download location', () => {
-        expect(mockDownloadImage).toHaveBeenCalledWith(imageData.downloadLocation);
       });
     });
   });

@@ -86,19 +86,6 @@
   border-color: #388ae5;
 }
 
-.inline-image__embed-button {
-  width: 50%;
-  background-color: #388ae5;
-  color: white;
-  text-align: center;
-  margin: auto;
-  cursor: pointer;
-}
-
-.inline-image__embed-button:hover {
-  opacity: 0.9;
-}
-
 .inline-image__control-panel {
   padding: 10px;
   border-radius: 4px;

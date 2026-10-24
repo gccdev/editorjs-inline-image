@@ -1,10 +1,10 @@
-import { make, isUrl, createImageCredits } from './helpers';
+import { make, createImageCredits } from './helpers';
 import ImageClient from './imageClient';
 
 /**
  * Renders control panel view
- *  - Embed image url
- *  - Embed image from Unspalsh
+ *  - Website images search
+ *  - Upload
  */
 export default class ControlPanel {
   /**
@@ -25,7 +25,6 @@ export default class ControlPanel {
       controlPanel: 'inline-image__control-panel',
       tabWrapper: 'inline-image__tab-wrapper',
       tab: 'inline-image__tab',
-      embedButton: 'inline-image__embed-button',
       search: 'inline-image__search',
       imageGallery: 'inline-image__image-gallery',
       noResults: 'inline-image__no-results',
@@ -43,10 +42,8 @@ export default class ControlPanel {
 
     this.nodes = {
       loader: null,
-      embedUrlTab: null,
       unsplashTab: null,
       mediaTab: null,
-      embedUrlPanel: null,
       unsplashPanel: null,
       mediaPanel: null,
       imageGallery: null,
@@ -71,10 +68,6 @@ export default class ControlPanel {
   render() {
     const wrapper = make('div', this.cssClasses.controlPanel);
     const tabWrapper = make('div', this.cssClasses.tabWrapper);
-    const embedUrlTab = make('div', this.cssClasses.tab, {
-      innerHTML: 'Embed URL',
-      onclick: () => this.showEmbedUrlPanel(),
-    });
     const unsplashTab = make('div', [this.cssClasses.tab, this.cssClasses.active], {
       innerHTML: 'Website Images',
       onclick: () => this.showUnsplashPanel(),
@@ -84,7 +77,6 @@ export default class ControlPanel {
       onclick: () => this.showUploadPanel(),
     });
 
-    const embedUrlPanel = this.renderEmbedUrlPanel();
     const unsplashPanel = this.renderUnsplashPanel();
     const uploadPanel = this.renderUploadPanel();
 
@@ -100,16 +92,6 @@ export default class ControlPanel {
     this.nodes.uploadTab = uploadTab;
 
     return wrapper;
-  }
-
-  /**
-   * Shows "Embed Url" control panel
-   *
-   * @returns {void}
-   */
-  showEmbedUrlPanel() {
-    this.nodes.unsplashTab.classList.remove(this.cssClasses.active);
-    this.nodes.unsplashPanel.classList.add(this.cssClasses.hidden);
   }
 
   /**
@@ -205,48 +187,6 @@ export default class ControlPanel {
           style: 'error',
         });
       });
-  }
-
-  /**
-   * Creates "Embed Url" control panel
-   *
-   * @returns {HTMLDivElement}
-   */
-  renderEmbedUrlPanel() {
-    const wrapper = make('div', this.cssClasses.hidden);
-    const urlInput = make('div', [this.cssClasses.input, this.cssClasses.caption], {
-      id: 'image-url',
-      contentEditable: 'true',
-    });
-    const embedImageButton = make('div', [this.cssClasses.embedButton, this.cssClasses.input], {
-      id: 'embed-button',
-      innerHTML: 'Embed Image',
-      onclick: () => this.embedButtonClicked(urlInput.innerHTML),
-    });
-
-    urlInput.dataset.placeholder = 'Enter image url...';
-
-    wrapper.appendChild(urlInput);
-    wrapper.appendChild(embedImageButton);
-
-    return wrapper;
-  }
-
-  /**
-   * OnClick handler for Embed Image Button
-   *
-   * @param {string} imageUrl Embeded image url
-   * @returns {void}
-   */
-  embedButtonClicked(imageUrl) {
-    if (isUrl(imageUrl)) {
-      this.onSelectImage({ url: imageUrl });
-    } else {
-      this.api.notifier.show({
-        message: 'Please enter a valid url.',
-        style: 'error',
-      });
-    }
   }
 
   /**
@@ -353,7 +293,7 @@ export default class ControlPanel {
     const imgWrapper = make('div', this.cssClasses.imgWrapper);
     const img = make('img', this.cssClasses.thumb, {
       src: image.thumb,
-      onclick: () => this.downloadUnsplashImage(image),
+      onclick: () => this.selectImage(image),
     });
 
     const imageCredits = createImageCredits({ ...image });
@@ -364,23 +304,12 @@ export default class ControlPanel {
   }
 
   /**
-   * Handler for embedding Unsplash images.
-   * Issues a request to Unsplash API
+   * Handler for a thumbnail click: embeds the chosen image
    *
-   * @param {{url: string, author: string, profileLink: string, downloadLocation: string}}
-   *  url - Image url
-   *  author - Unsplash image author name
-   *  profileLink - Unsplars author profile link
-   *  downloadLocation - Unsplash endpoint for image download
-   *
+   * @param {{url: string}} image Image object from the gallery
    * @returns {void}
    */
-  downloadUnsplashImage({
-    url, downloadLocation,
-  }) {
-    this.onSelectImage({
-      url,
-    });
-    this.unsplashClient.downloadImage(downloadLocation);
+  selectImage({ url }) {
+    this.onSelectImage({ url });
   }
 }
