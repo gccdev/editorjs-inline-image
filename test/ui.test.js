@@ -57,7 +57,7 @@ describe('Ui', () => {
     const { image } = ui.nodes;
     triggerEvent(image, 'error');
 
-    expect(notify).toBeCalled();
+    expect(notify).toHaveBeenCalled();
   });
 
   it('applies tune settings to image', () => {

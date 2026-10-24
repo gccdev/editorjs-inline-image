@@ -59,7 +59,7 @@ describe('InlineImage', () => {
         .mockResolvedValue('/media/pasted.png');
 
       inlineImage.onPaste(event);
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       const uploadedFile = upload.mock.calls[0][0];
       expect(uploadedFile).toBeInstanceOf(File);
@@ -91,7 +91,7 @@ describe('InlineImage', () => {
         .mockResolvedValue('/media/pic.png');
 
       inlineImage.onPaste(event);
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(upload).toHaveBeenCalledWith(file, expect.any(String));
       expect(mockSetData).toHaveBeenLastCalledWith({ url: '/media/pic.png', caption: 'pic.png' });
@@ -103,7 +103,7 @@ describe('InlineImage', () => {
       jest.spyOn(ImageClient.prototype, 'uploadImage').mockRejectedValue(new Error('fail'));
 
       inlineImage.onPaste(event);
-      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setTimeout(resolve, 0));
 
       expect(Ui.prototype.removeCurrentBlock).toHaveBeenCalled();
     });
