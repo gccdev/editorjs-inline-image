@@ -1,7 +1,6 @@
 import createControlPanel from './fixtures/controlPanel';
 import { parsedResponse } from './fixtures/unsplashApi';
 import { triggerEvent } from './testHelpers';
-import UnsplashClient from '../src/unsplashClient';
 import ImageClient from '../src/imageClient';
 
 const onSelectImage = jest.fn();
@@ -9,67 +8,45 @@ const notify = jest.fn();
 
 describe('ControlPanel', () => {
   let controlPanel;
+  let wrapper;
 
   beforeEach(() => {
     controlPanel = createControlPanel(onSelectImage, notify);
-    controlPanel.render();
+    wrapper = controlPanel.render();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('embedUrl', () => {
-    let embedUrlPanel;
-    let input;
-    let button;
+  describe('tabs', () => {
+    it('offers the website images and upload tabs and no embed-URL panel', () => {
+      const tabs = Array.from(wrapper.querySelectorAll('.inline-image__tab'), (tab) => tab.innerHTML);
 
-    beforeEach(() => {
-      embedUrlPanel = controlPanel.nodes.embedUrlPanel;
-      input = embedUrlPanel.querySelector('#image-url');
-      button = embedUrlPanel.querySelector('#embed-button');
-    });
-
-    it('renders the embedUrl panel', () => {
-      expect(embedUrlPanel).not.toBeEmptyDOMElement();
-      expect(embedUrlPanel).toBeVisible();
-    });
-
-    it('embeds image from valid url', () => {
-      const imageUrl = 'example.com/image.jpg';
-      input.innerHTML = imageUrl;
-      button.click();
-
-      expect(onSelectImage).toHaveBeenCalledWith({ url: imageUrl });
-      expect(notify).not.toHaveBeenCalled();
-    });
-
-    it('shows a error message if image url is not valid', () => {
-      const imageUrl = 'not-valid';
-      input.innerHTML = imageUrl;
-      button.click();
-
-      expect(onSelectImage).not.toHaveBeenCalled();
-      expect(notify).toHaveBeenCalled();
+      expect(tabs).toEqual(['Website Images', 'Upload']);
+      expect(controlPanel.nodes.embedUrlPanel).toBeNull();
+      expect(wrapper.querySelector('#image-url')).toBeNull();
     });
   });
 
-  describe('unsplash', () => {
+  describe('website images', () => {
     let unsplashPanel;
 
     beforeEach(() => {
       unsplashPanel = controlPanel.nodes.unsplashPanel;
     });
 
-    it('creates the unsplash panel (hidden)', () => {
+    it('shows the website images panel on open', () => {
       expect(unsplashPanel).not.toBeEmptyDOMElement();
 
-      expect(unsplashPanel).toHaveClass('hidden');
+      expect(unsplashPanel).toHaveClass('active');
+      expect(unsplashPanel).not.toHaveClass('hidden');
+      expect(controlPanel.nodes.unsplashTab).toHaveClass('active');
     });
 
-    describe('unsplash search', () => {
-      it('triggers unsplash image search on input event', () => {
-        const mockSearchImages = jest.spyOn(UnsplashClient.prototype, 'searchImages')
+    describe('image search', () => {
+      it('triggers an image search on input event', () => {
+        const mockSearchImages = jest.spyOn(ImageClient.prototype, 'searchImages')
           .mockImplementation();
         jest.useFakeTimers();
 
@@ -83,7 +60,7 @@ describe('ControlPanel', () => {
         expect(mockSearchImages).toHaveBeenCalledWith(query, expect.any(Function));
       });
 
-      it('creates image gallery from unsplash data', () => {
+      it('creates image gallery from search results', () => {
         controlPanel.appendImagesToGallery(parsedResponse);
 
         const { imageGallery } = controlPanel.nodes;
@@ -113,7 +90,7 @@ describe('ControlPanel', () => {
       let mockDownloadImage;
 
       beforeEach(() => {
-        mockDownloadImage = jest.spyOn(UnsplashClient.prototype, 'downloadImage')
+        mockDownloadImage = jest.spyOn(ImageClient.prototype, 'downloadImage')
           .mockImplementation();
         controlPanel.appendImagesToGallery([parsedResponse[0]]);
         imageGallery = controlPanel.nodes.imageGallery;
@@ -121,17 +98,11 @@ describe('ControlPanel', () => {
         imageGallery.querySelector('.inline-image__thumb').click();
       });
 
-      it('embeds image from unsplash', () => {
-        expect(onSelectImage).toHaveBeenCalledWith(expect.objectContaining({
-          unsplash: {
-            author: imageData.author,
-            profileLink: imageData.profileLink,
-          },
-          url: imageData.url,
-        }));
+      it('selects the image by its url alone, without unsplash credits', () => {
+        expect(onSelectImage).toHaveBeenCalledWith({ url: imageData.url });
       });
 
-      it('downloads image from unspalsh', () => {
+      it('requests the image download location', () => {
         expect(mockDownloadImage).toHaveBeenCalledWith(imageData.downloadLocation);
       });
     });

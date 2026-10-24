@@ -30,7 +30,7 @@ describe('Ui', () => {
       expect(caption.innerHTML).toBe(data.caption);
       expect(wrapper).toContainElement(image);
       expect(wrapper).toContainElement(caption);
-      expect(credits).not.toBeEmptyDOMElement();
+      expect(credits).toBeNull();
     });
 
     it('does not render image credits if unsplash data is not valid', () => {
