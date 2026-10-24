@@ -58,7 +58,6 @@ export default class ImageClient {
    * @param {{results: string}} results Array of images from Unsplash
    */
   parseResponse({ data }) {
-    console.log(data)
     return data.map((image) => this.buildImageObject(image));
   }
 

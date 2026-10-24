@@ -4,10 +4,12 @@ module.exports = {
   rules: {
     'class-methods-use-this': ['off'],
     'no-underscore-dangle': ['error', { allowAfterThis: true }],
+    'no-console': ['error', { allow: ['error'] }],
   },
   globals: {
     fetch: false,
     document: false,
+    MutationObserver: false,
     FileReader: false,
     FormData: false,
     File: false,

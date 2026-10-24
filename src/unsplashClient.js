@@ -66,6 +66,6 @@ export default class UnsplashClient {
       params: {
         client_id: this.clientId,
       },
-    }).catch((error) => console.log(error));
+    }).catch((error) => console.error(error));
   }
 }

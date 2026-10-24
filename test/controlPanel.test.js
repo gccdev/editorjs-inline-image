@@ -1,6 +1,6 @@
 import createControlPanel from './fixtures/controlPanel';
 import { parsedResponse } from './fixtures/unsplashApi';
-import { triggerEvent } from './testHelpers';
+import triggerEvent from './testHelpers';
 import ImageClient from '../src/imageClient';
 
 const onSelectImage = jest.fn();

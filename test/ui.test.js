@@ -1,6 +1,6 @@
 import createUi from './fixtures/ui';
 import { data } from './fixtures/toolData';
-import { triggerEvent } from './testHelpers';
+import triggerEvent from './testHelpers';
 import ControlPanel from '../src/controlPanel';
 
 const notify = jest.fn();

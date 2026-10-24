@@ -1,4 +1,4 @@
-import { make, createImageCredits } from './helpers';
+import { make } from './helpers';
 import Tunes from './tunes';
 import ControlPanel from './controlPanel';
 import bgIcon from '../assets/backgroundIcon.svg';
