@@ -74,20 +74,6 @@ export default class ImageClient {
       format: image.format,
       url: image.url,
       thumb: image.thumbnail,
-      downloadLocation: image.url
     };
-  }
-
-  /**
-  * Download image from Unsplash
-  * Required by Unsplash API Guideline for tracking purposes
-  * https://help.unsplash.com/en/articles/2511258-guideline-triggering-a-download
-  *
-  * @param {string} downloadLocation Image download endpoint
-  * @returns {void}
-  */
-  downloadImage(downloadLocation) {
-    axios.get(downloadLocation)
-    .catch((error) => console.log(error));
   }
 }
