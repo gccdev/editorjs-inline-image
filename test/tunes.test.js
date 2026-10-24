@@ -24,7 +24,7 @@ describe('Tunes', () => {
 
     button.click();
 
-    expect(callback).toBeCalled();
+    expect(callback).toHaveBeenCalled();
   });
 
   it('changes button state when clicked', () => {
