@@ -37,7 +37,7 @@
     "nock": "^14.0.17",
     "style-loader": "^4.0.0",
     "webpack": "^5.112.2",
-    "webpack-cli": "^7.2.3"
+    "webpack-cli": "^7.3.1"
   },
   "dependencies": {
     "axios": "^1.21.0"
